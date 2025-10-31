@@ -1,6 +1,10 @@
 import { FC, SyntheticEvent, useState } from 'react';
 import { useDispatch, useSelector } from '../../services/store';
-import { loginUser } from '../../services/slices/userSlice';
+import {
+  loginUser,
+  getUserError,
+  getUserLoading
+} from '../../services/slices/userSlice';
 import { LoginUI } from '@ui-pages';
 
 export const Login: FC = () => {
@@ -8,7 +12,8 @@ export const Login: FC = () => {
   const [password, setPassword] = useState('');
 
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.user);
+  const error = useSelector(getUserError);
+  const loading = useSelector(getUserLoading);
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();

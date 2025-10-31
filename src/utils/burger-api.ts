@@ -1,4 +1,4 @@
-import { setCookie, getCookie } from './cookie';
+import { setCookie, getCookie, deleteCookie } from './cookie';
 import { TIngredient, TOrder, TOrdersData, TUser } from './types';
 
 const URL = process.env.BURGER_API_URL;
@@ -45,11 +45,17 @@ export const fetchWithRefresh = async <T>(
   } catch (err) {
     if ((err as { message: string }).message === 'jwt expired') {
       const refreshData = await refreshToken();
-      if (options.headers) {
-        (options.headers as { [key: string]: string }).authorization =
-          refreshData.accessToken;
-      }
-      const res = await fetch(url, options);
+
+      // Обновляем headers с новым токеном
+      const updatedOptions = {
+        ...options,
+        headers: {
+          ...options.headers,
+          authorization: refreshData.accessToken
+        } as HeadersInit
+      };
+
+      const res = await fetch(url, updatedOptions);
       return await checkResponse<T>(res);
     } else {
       return Promise.reject(err);
@@ -92,7 +98,7 @@ export const getOrdersApi = () =>
     method: 'GET',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
-      authorization: getCookie('accessToken')
+      authorization: getCookie('accessToken') || ''
     } as HeadersInit
   }).then((data) => {
     if (data?.success) return data.orders;
@@ -109,7 +115,7 @@ export const orderBurgerApi = (data: string[]) =>
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
-      authorization: getCookie('accessToken')
+      authorization: getCookie('accessToken') || ''
     } as HeadersInit,
     body: JSON.stringify({
       ingredients: data
@@ -153,7 +159,12 @@ export const registerUserApi = (data: TRegisterData) =>
   })
     .then((res) => checkResponse<TAuthResponse>(res))
     .then((data) => {
-      if (data?.success) return data;
+      if (data?.success) {
+        // Сохраняем токены при успешной регистрации
+        localStorage.setItem('refreshToken', data.refreshToken);
+        setCookie('accessToken', data.accessToken);
+        return data;
+      }
       return Promise.reject(data);
     });
 
@@ -172,7 +183,12 @@ export const loginUserApi = (data: TLoginData) =>
   })
     .then((res) => checkResponse<TAuthResponse>(res))
     .then((data) => {
-      if (data?.success) return data;
+      if (data?.success) {
+        // Сохраняем токены при успешном логине
+        localStorage.setItem('refreshToken', data.refreshToken);
+        setCookie('accessToken', data.accessToken);
+        return data;
+      }
       return Promise.reject(data);
     });
 
@@ -206,19 +222,25 @@ export const resetPasswordApi = (data: { password: string; token: string }) =>
 
 type TUserResponse = TServerResponse<{ user: TUser }>;
 
-export const getUserApi = () =>
-  fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ: добавлен метод GET и правильная обработка
+export const getUserApi = (): Promise<TAuthResponse> =>
+  fetchWithRefresh<TAuthResponse>(`${URL}/auth/user`, {
+    method: 'GET',
     headers: {
-      authorization: getCookie('accessToken')
+      'Content-Type': 'application/json;charset=utf-8',
+      authorization: getCookie('accessToken') || ''
     } as HeadersInit
   });
 
-export const updateUserApi = (user: Partial<TRegisterData>) =>
-  fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ: добавлен правильный тип возврата
+export const updateUserApi = (
+  user: Partial<TRegisterData>
+): Promise<TAuthResponse> =>
+  fetchWithRefresh<TAuthResponse>(`${URL}/auth/user`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
-      authorization: getCookie('accessToken')
+      authorization: getCookie('accessToken') || ''
     } as HeadersInit,
     body: JSON.stringify(user)
   });
@@ -232,4 +254,14 @@ export const logoutApi = () =>
     body: JSON.stringify({
       token: localStorage.getItem('refreshToken')
     })
-  }).then((res) => checkResponse<TServerResponse<{}>>(res));
+  })
+    .then((res) => checkResponse<TServerResponse<{}>>(res))
+    .then((data) => {
+      if (data?.success) {
+        // Удаляем токены при выходе
+        localStorage.removeItem('refreshToken');
+        deleteCookie('accessToken');
+        return data;
+      }
+      return Promise.reject(data);
+    });

@@ -1,11 +1,16 @@
 import { ProfileUI } from '@ui-pages';
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from '../../services/store';
-import { updateUser } from '../../services/slices/userSlice';
+import {
+  updateUser,
+  getUser,
+  getUserLoading
+} from '../../services/slices/userSlice';
 
 export const Profile: FC = () => {
   const dispatch = useDispatch();
-  const { user, loading } = useSelector((state) => state.user);
+  const user = useSelector(getUser);
+  const loading = useSelector(getUserLoading);
 
   const [formValue, setFormValue] = useState({
     name: user?.name || '',
@@ -13,12 +18,15 @@ export const Profile: FC = () => {
     password: ''
   });
 
+  const [showButtons, setShowButtons] = useState(false);
+
   useEffect(() => {
     setFormValue({
       name: user?.name || '',
       email: user?.email || '',
       password: ''
     });
+    setShowButtons(false);
   }, [user]);
 
   const isFormChanged =
@@ -28,13 +36,19 @@ export const Profile: FC = () => {
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    dispatch(
-      updateUser({
-        name: formValue.name,
-        email: formValue.email,
-        ...(formValue.password && { password: formValue.password })
-      })
-    );
+    if (isFormChanged) {
+      dispatch(
+        updateUser({
+          name: formValue.name,
+          email: formValue.email,
+          ...(formValue.password && { password: formValue.password })
+        })
+      ).then(() => {
+        setShowButtons(false);
+        // Очищаем пароль после сохранения
+        setFormValue((prev) => ({ ...prev, password: '' }));
+      });
+    }
   };
 
   const handleCancel = (e: SyntheticEvent) => {
@@ -44,6 +58,7 @@ export const Profile: FC = () => {
       email: user?.email || '',
       password: ''
     });
+    setShowButtons(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,6 +66,11 @@ export const Profile: FC = () => {
       ...prevState,
       [e.target.name]: e.target.value
     }));
+
+    // Показываем кнопки при изменении формы
+    if (!showButtons) {
+      setShowButtons(true);
+    }
   };
 
   return (

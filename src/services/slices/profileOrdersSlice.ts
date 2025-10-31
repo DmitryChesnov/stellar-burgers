@@ -46,3 +46,12 @@ const profileOrdersSlice = createSlice({
 });
 
 export const profileOrdersReducer = profileOrdersSlice.reducer;
+export const getProfileOrders = (state: {
+  profileOrders: TProfileOrdersState;
+}) => state.profileOrders.orders;
+export const getProfileOrdersLoading = (state: {
+  profileOrders: TProfileOrdersState;
+}) => state.profileOrders.loading;
+export const getProfileOrdersError = (state: {
+  profileOrders: TProfileOrdersState;
+}) => state.profileOrders.error;

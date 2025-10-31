@@ -2,9 +2,18 @@ import { FC, useMemo, useEffect, useState } from 'react';
 import { useSelector } from '../../services/store';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
-import { TIngredient } from '@utils-types';
+import { TIngredient, TOrder } from '@utils-types';
 import { useParams } from 'react-router-dom';
 import { getOrderByNumberApi } from '@api';
+
+// ДОБАВЛЕНО: Тип для данных заказа с дополнительной информацией
+type TOrderInfoData = TOrder & {
+  ingredientsInfo: {
+    [key: string]: TIngredient & { count: number };
+  };
+  date: Date;
+  total: number;
+};
 
 export const OrderInfo: FC = () => {
   const { number } = useParams<{ number: string }>();
@@ -12,7 +21,7 @@ export const OrderInfo: FC = () => {
     (state) => state.ingredients.ingredients
   );
 
-  const [orderData, setOrderData] = useState<any>(null);
+  const [orderData, setOrderData] = useState<TOrder | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -63,7 +72,6 @@ export const OrderInfo: FC = () => {
       {} as TIngredientsWithCount
     );
 
-    // Явно указываем тип для значений ingredientsInfo
     const ingredientsArray = Object.values(ingredientsInfo) as (TIngredient & {
       count: number;
     })[];
@@ -79,7 +87,7 @@ export const OrderInfo: FC = () => {
       ingredientsInfo,
       date,
       total
-    };
+    } as TOrderInfoData;
   }, [orderData, ingredients]);
 
   if (loading) {
@@ -90,5 +98,16 @@ export const OrderInfo: FC = () => {
     return <div>Заказ не найден</div>;
   }
 
-  return <OrderInfoUI orderInfo={orderInfo} />;
+  return (
+    <div>
+      {/* ДОБАВЛЕНО: Отображение номера заказа без стилей */}
+      <p
+        className='text text_type_digits-default mb-10'
+        style={{ textAlign: 'center' }}
+      >
+        #{orderInfo.number}
+      </p>
+      <OrderInfoUI orderInfo={orderInfo} />
+    </div>
+  );
 };

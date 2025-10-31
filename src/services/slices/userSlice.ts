@@ -162,3 +162,9 @@ const userSlice = createSlice({
 
 export const { clearError, resetLoading, setAuthChecked } = userSlice.actions;
 export const userReducer = userSlice.reducer;
+export const getUser = (state: { user: TUserState }) => state.user.user;
+export const getUserLoading = (state: { user: TUserState }) =>
+  state.user.loading;
+export const getUserError = (state: { user: TUserState }) => state.user.error;
+export const getIsAuthChecked = (state: { user: TUserState }) =>
+  state.user.isAuthChecked;

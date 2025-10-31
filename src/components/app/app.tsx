@@ -23,22 +23,28 @@ import '../../index.css';
 import styles from './app.module.css';
 import { FC, useEffect } from 'react';
 import { useDispatch, useSelector } from '../../services/store';
-import { fetchUser } from '../../services/slices/userSlice';
+import { fetchUser, getIsAuthChecked } from '../../services/slices/userSlice';
+// УБРАТЬ: import { fetchFeeds } from '../../services/slices/feedSlice';
 
 const AppContent: FC = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const background = location.state?.background;
+  const isAuthChecked = useSelector(getIsAuthChecked);
 
-  // Загружаем данные пользователя при старте приложения
   useEffect(() => {
     dispatch(fetchUser());
+    // УБРАТЬ: dispatch(fetchFeeds());
   }, [dispatch]);
 
   const handleModalClose = () => {
     navigate(-1);
   };
+
+  if (!isAuthChecked) {
+    return <div>Загрузка...</div>;
+  }
 
   return (
     <>
