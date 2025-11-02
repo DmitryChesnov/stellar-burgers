@@ -6,7 +6,6 @@ import { TIngredient, TOrder } from '@utils-types';
 import { useParams } from 'react-router-dom';
 import { getOrderByNumberApi } from '@api';
 
-// ДОБАВЛЕНО: Тип для данных заказа с дополнительной информацией
 type TOrderInfoData = TOrder & {
   ingredientsInfo: {
     [key: string]: TIngredient & { count: number };
@@ -43,7 +42,6 @@ export const OrderInfo: FC = () => {
     fetchOrder();
   }, [number]);
 
-  /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
@@ -100,7 +98,6 @@ export const OrderInfo: FC = () => {
 
   return (
     <div>
-      {/* ДОБАВЛЕНО: Отображение номера заказа без стилей */}
       <p
         className='text text_type_digits-default mb-10'
         style={{ textAlign: 'center' }}

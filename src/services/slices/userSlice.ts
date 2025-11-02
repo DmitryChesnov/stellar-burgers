@@ -10,7 +10,6 @@ import {
   TRegisterData
 } from '@api';
 
-// Асинхронные actions
 export const loginUser = createAsyncThunk(
   'user/login',
   async (data: TLoginData) => {
@@ -42,7 +41,6 @@ export const fetchUser = createAsyncThunk(
       const response = await getUserApi();
       return response.user;
     } catch (error) {
-      // Важно: возвращаем ошибку через rejectWithValue для корректной обработки
       return rejectWithValue(error);
     }
   }
@@ -56,14 +54,14 @@ type TUserState = {
   user: TUser | null;
   loading: boolean;
   error: string | null;
-  isAuthChecked: boolean; // ДОБАВЛЕНО: флаг проверки авторизации
+  isAuthChecked: boolean;
 };
 
 const initialState: TUserState = {
   user: null,
   loading: false,
   error: null,
-  isAuthChecked: false // ДОБАВЛЕНО: изначально не проверено
+  isAuthChecked: false
 };
 
 const userSlice = createSlice({
@@ -73,18 +71,15 @@ const userSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    // ДОБАВЛЕНО: сброс состояния загрузки
     resetLoading: (state) => {
       state.loading = false;
     },
-    // ДОБАВЛЕНО: установка флага проверки авторизации
     setAuthChecked: (state, action: PayloadAction<boolean>) => {
       state.isAuthChecked = action.payload;
     }
   },
   extraReducers: (builder) => {
     builder
-      // Login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -92,14 +87,13 @@ const userSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-        state.isAuthChecked = true; // ДОБАВЛЕНО
+        state.isAuthChecked = true;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Login failed';
-        state.isAuthChecked = true; // ДОБАВЛЕНО
+        state.isAuthChecked = true;
       })
-      // Register
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -107,14 +101,13 @@ const userSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-        state.isAuthChecked = true; // ДОБАВЛЕНО
+        state.isAuthChecked = true;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Registration failed';
-        state.isAuthChecked = true; // ДОБАВЛЕНО
+        state.isAuthChecked = true;
       })
-      // Update user
       .addCase(updateUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -127,7 +120,6 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Update failed';
       })
-      // Fetch user - ДОБАВЛЕН полный обработчик
       .addCase(fetchUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -135,27 +127,26 @@ const userSlice = createSlice({
       .addCase(fetchUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-        state.isAuthChecked = true; // ДОБАВЛЕНО: авторизация проверена
+        state.isAuthChecked = true;
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch user';
-        state.user = null; // Важно: сбрасываем пользователя при ошибке
-        state.isAuthChecked = true; // ДОБАВЛЕНО: авторизация проверена (даже при ошибке)
+        state.user = null;
+        state.isAuthChecked = true;
       })
-      // Logout
       .addCase(logoutUser.pending, (state) => {
         state.loading = true;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.loading = false;
         state.user = null;
-        state.isAuthChecked = true; // ДОБАВЛЕНО
+        state.isAuthChecked = true;
       })
       .addCase(logoutUser.rejected, (state) => {
         state.loading = false;
-        state.user = null; // Все равно сбрасываем пользователя
-        state.isAuthChecked = true; // ДОБАВЛЕНО
+        state.user = null;
+        state.isAuthChecked = true;
       });
   }
 });

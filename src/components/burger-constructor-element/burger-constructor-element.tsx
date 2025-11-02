@@ -1,16 +1,27 @@
 import { FC, memo } from 'react';
 import { BurgerConstructorElementUI } from '@ui';
 import { BurgerConstructorElementProps } from './type';
-import { useDispatch } from '../../services/store'; // ДОБАВЛЕНО: импорт useDispatch
-import { removeIngredient } from '../../services/slices/constructorSlice'; // ДОБАВЛЕНО: импорт action
+import { useDispatch } from '../../services/store';
+import {
+  moveIngredient,
+  removeIngredient
+} from '../../services/slices/constructorSlice';
 
 export const BurgerConstructorElement: FC<BurgerConstructorElementProps> = memo(
   ({ ingredient, index, totalItems }) => {
-    const dispatch = useDispatch(); // ДОБАВЛЕНО: получение dispatch
+    const dispatch = useDispatch();
 
-    const handleMoveDown = () => {};
+    const handleMoveDown = () => {
+      if (index < totalItems - 1) {
+        dispatch(moveIngredient({ from: index, to: index + 1 }));
+      }
+    };
 
-    const handleMoveUp = () => {};
+    const handleMoveUp = () => {
+      if (index > 0) {
+        dispatch(moveIngredient({ from: index, to: index - 1 }));
+      }
+    };
 
     const handleClose = () => {
       dispatch(removeIngredient(ingredient.id));
@@ -23,7 +34,7 @@ export const BurgerConstructorElement: FC<BurgerConstructorElementProps> = memo(
         totalItems={totalItems}
         handleMoveUp={handleMoveUp}
         handleMoveDown={handleMoveDown}
-        handleClose={handleClose} // ДОБАВЛЕНО: передача функции удаления в UI компонент
+        handleClose={handleClose}
       />
     );
   }

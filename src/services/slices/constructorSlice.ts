@@ -15,7 +15,6 @@ const constructorSlice = createSlice({
   name: 'burgerConstructor',
   initialState,
   reducers: {
-    // ДОБАВЛЕНО: Действия для управления конструктором
     addBun: (state, action: PayloadAction<TIngredient>) => {
       state.bun = action.payload;
     },
@@ -23,7 +22,6 @@ const constructorSlice = createSlice({
       reducer: (state, action: PayloadAction<TConstructorIngredient>) => {
         state.ingredients.push(action.payload);
       },
-      // ДОБАВЛЕНО: prepare функция для генерации уникального id
       prepare: (ingredient: TIngredient) => {
         const id = `${ingredient._id}-${Date.now()}`;
         return { payload: { ...ingredient, id } };

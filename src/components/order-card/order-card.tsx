@@ -23,7 +23,7 @@ export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
         if (ingredient) return [...acc, ingredient];
         return acc;
       },
-      []
+      [] as TIngredient[]
     );
 
     const total = ingredientsInfo.reduce((acc, item) => acc + item.price, 0);

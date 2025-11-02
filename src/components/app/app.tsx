@@ -24,7 +24,7 @@ import styles from './app.module.css';
 import { FC, useEffect } from 'react';
 import { useDispatch, useSelector } from '../../services/store';
 import { fetchUser, getIsAuthChecked } from '../../services/slices/userSlice';
-// УБРАТЬ: import { fetchFeeds } from '../../services/slices/feedSlice';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice'; // ДОБАВИТЬ
 
 const AppContent: FC = () => {
   const dispatch = useDispatch();
@@ -32,11 +32,15 @@ const AppContent: FC = () => {
   const navigate = useNavigate();
   const background = location.state?.background;
   const isAuthChecked = useSelector(getIsAuthChecked);
+  const { ingredients } = useSelector((state) => state.ingredients); // ДОБАВИТЬ
 
   useEffect(() => {
     dispatch(fetchUser());
-    // УБРАТЬ: dispatch(fetchFeeds());
-  }, [dispatch]);
+    // Загружаем ингредиенты только если их нет
+    if (ingredients.length === 0) {
+      dispatch(fetchIngredients());
+    }
+  }, [dispatch, ingredients.length]); // ДОБАВИТЬ зависимость
 
   const handleModalClose = () => {
     navigate(-1);

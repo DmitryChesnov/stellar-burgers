@@ -1,4 +1,4 @@
-import { FC, useMemo, useEffect } from 'react'; // ДОБАВЛЕНО: useEffect
+import { FC, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TConstructorIngredient } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
@@ -14,10 +14,8 @@ export const BurgerConstructor: FC = () => {
   const { order, loading: orderRequest } = useSelector((state) => state.order);
   const user = useSelector((state) => state.user.user);
 
-  // ДОБАВЛЕНО: Очистка конструктора при успешном создании заказа
   useEffect(() => {
     if (order && order.number) {
-      // Заказ успешно создан - очищаем конструктор
       dispatch(clearConstructor());
     }
   }, [order, dispatch]);
@@ -40,9 +38,7 @@ export const BurgerConstructor: FC = () => {
   };
 
   const closeOrderModal = () => {
-    // ИЗМЕНЕНО: Очищаем только данные заказа, НЕ конструктор
     dispatch(clearOrder());
-    // Конструктор теперь очищается автоматически при успешном ответе от сервера
   };
 
   const price = useMemo(
